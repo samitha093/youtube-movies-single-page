@@ -1,0 +1,54 @@
+
+port: 7890
+socks-port: 7891
+redir-port: 7892
+mixed-port: 7893
+mode: rule
+log-level: silent
+allow-lan: true
+external-controller: 0.0.0.0:9090
+bind-address: "*"
+ipv6: false
+dns:
+  enable: true
+  ipv6: false
+  enhanced-mode: redir-host
+  listen: 0.0.0.0:7894
+  fallback-filter:
+    geoip: false
+    ipcidr:
+    - 240.0.0.0/4
+  nameserver:
+    - https://cloudflare-dns.com/dns-query
+    - https://dns.google/dns-query
+    - tls://1.1.1.1:853
+    - tls://8.8.8.8:853
+  fallback:
+    - tcp://1.1.1.1
+    - tcp://8.8.8.8
+    - 1.1.1.1
+    - 8.8.8.8
+tun:
+  enable: true
+  stack: system 
+  macOS-auto-route: true
+  macOS-auto-detect-interface: true
+  dns-hijack:
+    - tcp://8.8.8.8:53
+experimental:
+  interface-name: en0
+
+proxies:
+  - {name: lakshan-mobile, server: vps.ocwud.com, port: 24616, type: vmess, uuid: bb6dba27-aedc-483c-d61d-5c407eff1a8a, sni: twitter.com , alterId: 0, cipher: auto, tls: 1, skip-cert-verify: true, udp: true, network: ws, ws-opts: {path: /, headers: {Host: twitter.com}}}
+
+proxy-groups:
+  - name: sshkit-generator
+    type: load-balance
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300
+    strategy: consistent-hashing
+    proxies:
+      - lakshan-mobile
+
+rules:
+ - MATCH,sshkit-generator
